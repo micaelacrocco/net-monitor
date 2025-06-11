@@ -80,15 +80,20 @@ jobs:
           
           invalid_commits=""
           
+          # Activar case-insensitive para =~
+          shopt -s nocasematch
+          
           while IFS= read -r commit_msg; do
-            # Validar formato: "tipo: descripción breve" (sin paréntesis de scope)
+            # Validar formato: "tipo: descripción breve" (insensible a mayúsculas)
             if [[ ! $commit_msg =~ ^(feat|fix|docs|style|refactor|test|chore): .+ ]]; then
               echo "❌ Commit inválido (formato): '$commit_msg'"
               invalid_commits="$invalid_commits\n  • $commit_msg (formato incorrecto)"
             else
               # Validar que esté en inglés (no contiene caracteres especiales del español)
               description=$(echo "$commit_msg" | sed 's/^[^:]*: //')
-              if [[ $description =~ [ñáéíóúü¿¡] ]]; then
+              # Pasar a minúsculas para facilitar la búsqueda
+              description_lower=$(echo "$description" | tr '[:upper:]' '[:lower:]')
+              if [[ $description_lower =~ [ñáéíóúü¿¡] ]]; then
                 echo "❌ Commit inválido (idioma): '$commit_msg'"
                 invalid_commits="$invalid_commits\n  • $commit_msg (debe estar en inglés)"
               else
@@ -132,6 +137,11 @@ jobs:
             echo "   • fix: corregir bug (no está en inglés)"
             echo ""
             echo "⚠️  IMPORTANTE: Los commits deben estar en INGLÉS"
+            exit 1
+          fi
+          
+          echo "✅ Todos los commits tienen formato válido"
+
             exit 1
           fi
           
