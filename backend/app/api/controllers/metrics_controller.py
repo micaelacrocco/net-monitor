@@ -1,0 +1,1 @@
+# validar qué métricas son válidas para qué tipo de dispositivo antes de guardar.
